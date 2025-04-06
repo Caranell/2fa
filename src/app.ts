@@ -7,6 +7,7 @@ import http from 'http'
 import morgan from 'morgan'
 
 import { createLogger } from '@/helpers'
+import { dbService } from '@/modules/db-module'
 import { router } from '@/router'
 
 export const logger = createLogger()
@@ -40,6 +41,11 @@ app.use(router)
 const handleShutDown = (signal: NodeJS.Signals) => {
     logger.info(`Received ${signal}. Shutting down gracefully...`)
 
+    // Disconnect from MongoDB
+    dbService.disconnect().catch(err => {
+        logger.error(`Failed to disconnect from MongoDB: ${err.message}`)
+    })
+
     server.close(err => {
         if (err) {
             logger.error('Failed to close server')
@@ -57,6 +63,12 @@ const handleShutDown = (signal: NodeJS.Signals) => {
         process.exit(1)
     }, MAX_SHUTDOWN_WAIT_TIME)
 }
+
+// Connect to MongoDB
+dbService.connect().catch(err => {
+    logger.error(`Failed to connect to MongoDB: ${err.message}`)
+    process.exit(1)
+})
 
 // Start the server
 //

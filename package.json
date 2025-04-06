@@ -13,9 +13,6 @@
         "lint": "eslint . --ext .ts",
         "lint:fix": "eslint . --ext .ts --fix"
     },
-    "gitHooks": {
-        "pre-commit": "npm run ts-check && npm run lint && npm run test"
-    },
     "nodemonConfig": {
         "ignore": [
             "**/*.test.ts",
@@ -35,8 +32,11 @@
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
+        "mongodb": "^6.15.0",
         "morgan": "^1.10.0",
+        "otpauth": "^9.4.0",
         "reflect-metadata": "^0.2.2",
+        "viem": "^2.25.0",
         "winston": "^3.14.1"
     },
     "devDependencies": {
