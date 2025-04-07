@@ -64,19 +64,21 @@ const handleShutDown = (signal: NodeJS.Signals) => {
     }, MAX_SHUTDOWN_WAIT_TIME)
 }
 
-// Connect to MongoDB
-dbService.connect().catch(err => {
-    logger.error(`Failed to connect to MongoDB: ${err.message}`)
-    process.exit(1)
-})
+// Only connect to MongoDB and start server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+    // Connect to MongoDB
+    dbService.connect().catch(err => {
+        logger.error(`Failed to connect to MongoDB: ${err.message}`)
+        process.exit(1)
+    })
 
-// Start the server
-//
-server.listen(PORT, HOST, () => logger.info(`Custom detector service started on ${URL}`))
+    // Start the server
+    server.listen(PORT, HOST, () => logger.info(`Custom detector service started on ${URL}`))
 
-// Listen for termination signals
-process.on('SIGINT', handleShutDown)
-process.on('SIGTERM', handleShutDown)
+    // Listen for termination signals
+    process.on('SIGINT', handleShutDown)
+    process.on('SIGTERM', handleShutDown)
+}
 
 // Exports
 //

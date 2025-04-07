@@ -34,18 +34,13 @@ export class AuthService {
      * @param username The username to generate TOTP for
      * @returns An object containing the TOTP URI and secret
      */
-    public static generateTOTP(username: string) {
+    public static generateTOTPForUser(username: string) {
         const secret = this.generateSecret()
 
         const totp = new OTPAuth.TOTP({
             ...TOTP_DEFAULT_SETTINGS,
             label: username,
             secret: secret,
-        })
-
-        // Store the username and OTP secret in MongoDB
-        usersService.createUser(username, secret).catch((error: Error) => {
-            logger.error(`Failed to save user OTP secret: ${error.message}`)
         })
 
         return {
@@ -73,7 +68,7 @@ export class AuthService {
             const totp = new OTPAuth.TOTP({
                 ...TOTP_DEFAULT_SETTINGS,
                 label: username,
-                secret: user.otpSecret,
+                secret: user!.otpSecret,
             })
 
             // Validate with a window of 1 to allow for slight time differences

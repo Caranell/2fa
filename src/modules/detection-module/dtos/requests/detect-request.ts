@@ -152,5 +152,8 @@ export class DetectionRequest {
 
     @IsObject()
     @IsOptional()
-    additionalData?: Record<string, unknown>
+    additionalData?: {
+        username?: string
+        token?: string
+    } & Record<string, unknown>
 }

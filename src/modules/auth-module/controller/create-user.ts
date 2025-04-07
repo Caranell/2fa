@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 
+import { usersService } from '@/modules/db-module'
+
 import { AuthService } from '../auth.service'
 
 export const createUser = async (req: Request, res: Response) => {
@@ -10,7 +12,8 @@ export const createUser = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Username is required' })
         }
 
-        const totpData = AuthService.generateTOTP(username)
+        const totpData = AuthService.generateTOTPForUser(username)
+        await usersService.createUser(username, totpData.secret)
 
         return res.status(201).json({
             message: 'User created successfully',

@@ -1,7 +1,8 @@
 import { Router } from 'express'
 
-/* IMPORT ALL YOUR ROUTERS */
-import { appRouter, authRouter, detectionRouter } from '@/modules'
+import { appRouter } from '@/modules/app-module/router'
+import { authRouter } from '@/modules/auth-module/router'
+import { detectionRouter } from '@/modules/detection-module/router'
 
 const router = Router()
 

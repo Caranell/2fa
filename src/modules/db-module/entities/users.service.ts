@@ -124,7 +124,7 @@ class UsersService {
             const result = await collection.deleteOne({ username })
 
             if (result.deletedCount === 0) {
-                throw new Error(`User ${username} not found or already deleted`)
+                // throw new Error(`User ${username} not found or already deleted`)
             }
 
             logger.info(`Deleted user: ${username}`)
