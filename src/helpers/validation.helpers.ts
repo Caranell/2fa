@@ -43,53 +43,6 @@ export async function validateRequest(classToValidate: object) {
     )
 }
 
-/**
- * Recursively formats a list of validation errors into a more readable format.
- *
- * This function handles nested validation errors by recursively processing the `children` property of each
- * `ValidationError` object. The `message` field in the `FormattedError` output includes the full path to
- * the nested property that failed validation.
- *
- * @param errorsList - An array of `ValidationError` objects returned by class-validator.
- *
- * @returns An array of `FormattedError` objects, each containing a message and details about the validation error.
- *
- * @example
- * ```typescript
- * const validationErrors: ValidationError[] = [
- *     {
- *         property: 'user',
- *         value: { name: 123 },
- *         constraints: {
- *             isObject: 'user must be an object'
- *         },
- *         children: [
- *             {
- *                 property: 'name',
- *                 value: 123,
- *                 constraints: {
- *                     isString: 'name must be a string'
- *                 }
- *             }
- *         ]
- *     }
- * ];
- *
- * const formattedErrors = formatValidationErrors(validationErrors);
- * console.log(formattedErrors);
- * // Output:
- * // [
- * //     {
- * //         message: "'user' not passed the validation",
- * //         details: "'{\"name\":123}' isn't a valid value. user must be an object"
- * //     },
- * //     {
- * //         message: "'user.name' not passed the validation",
- * //         details: "'123' isn't a valid value. name must be a string"
- * //     }
- * // ]
- * ```
- */
 const formatValidationErrors = (errorsList: ValidationError[]): FormattedError[] => {
     const errors: FormattedError[] = []
 

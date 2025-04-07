@@ -4,7 +4,7 @@ import { logger } from '@/app'
 
 import { usersService } from '../db-module'
 
-const TOTP_DEFAULT_SETTINGS = {
+export const TOTP_DEFAULT_SETTINGS = {
     issuer: 'VennNetwork',
     algorithm: 'SHA1',
     digits: 6,

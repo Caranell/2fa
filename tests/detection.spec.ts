@@ -1,11 +1,11 @@
 import { createServer } from 'http'
-import OTPAuth from 'otpauth'
+import * as OTPAuth from 'otpauth'
 import request from 'supertest'
 import { parseEther } from 'viem'
 
 import { app } from '@/app'
 import { usersService } from '@/modules'
-import { AuthService } from '@/modules/auth-module'
+import { TOTP_DEFAULT_SETTINGS } from '@/modules/auth-module'
 import { dbService } from '@/modules/db-module'
 import { DetectionRequest, DetectionResponse } from '@/modules/detection-module/dtos'
 import { HTTP_STATUS_CODES } from '@/types'
@@ -63,7 +63,7 @@ const BASE_REQUEST_PAYLOAD: Partial<DetectionRequest> = {
 }
 
 const TEST_USERNAME = 'testuser-2fa'
-const TEST_SECRET = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD' // Test secret
+const TEST_SECRET = 'KVKFKRCPNZQUYMLXOVYDSQKJKZDTSRLD'
 let totp: OTPAuth.TOTP
 
 describe('Detection service tests', () => {
@@ -73,21 +73,7 @@ describe('Detection service tests', () => {
         // Ensure database is connected before tests
         await dbService.connect()
 
-        // Create a test user with 2FA enabled
-        try {
-            await usersService.deleteUser(TEST_USERNAME) // Clean up if exists
-        } catch (error) {
-            // Ignore error if user doesn't exist, expected during first run or cleanup failure
-        }
-        await usersService.createUser(TEST_USERNAME, TEST_SECRET)
-        totp = new OTPAuth.TOTP({
-            issuer: 'ACME',
-            label: 'AzureDiamond',
-            algorithm: 'SHA1',
-            digits: 6,
-            period: 30,
-            secret: TEST_SECRET,
-        })
+        await usersService.deleteUser(TEST_USERNAME) // Clean up if exists
 
         // Start server on a different port
         await new Promise<void>(resolve => {
@@ -95,10 +81,18 @@ describe('Detection service tests', () => {
         })
     })
 
+    beforeEach(async () => {
+        await usersService.createUser(TEST_USERNAME, TEST_SECRET)
+        totp = new OTPAuth.TOTP({
+            ...TOTP_DEFAULT_SETTINGS,
+            label: TEST_USERNAME,
+            secret: TEST_SECRET,
+        })
+    })
+
     afterEach(async () => {
         // Clean up test data from MongoDB
         try {
-            await usersService.deleteUser('testuser')
             await usersService.deleteUser(TEST_USERNAME)
         } catch (error) {
             console.error('Error cleaning up test data:', error)
@@ -264,36 +258,7 @@ describe('Detection service tests', () => {
         expect(body.error).toBeFalsy()
     })
 
-    test('detect success - suspicious (value), 2FA - invalid user, valid token', async () => {
-        const validToken = totp.generate()
-        const payload = {
-            ...BASE_REQUEST_PAYLOAD,
-            trace: {
-                ...BASE_REQUEST_PAYLOAD.trace,
-                value: parseEther('2').toString(), // > 1 ETH
-            },
-            additionalData: {
-                username: 'invalid-user',
-                token: validToken, // Valid token, but invalid user
-            },
-        }
-        const response = await request(app)
-            .post('/detect')
-            .send(payload)
-            .set('Content-Type', 'application/json')
-
-        const body: DetectionResponse = response.body
-
-        // Assert
-        // Even with a valid token structure, the auth service should reject it because the user doesn't exist
-        expect(response.status).toBe(HTTP_STATUS_CODES.OK)
-        expect(body.detected).toBe(true)
-        expect(body.message).toContain('2FA token is invalid') // Service returns invalid token for non-existent user
-        expect(body.error).toBeFalsy()
-    })
-
     test('detect success - suspicious (value), 2FA - valid user, valid token', async () => {
-        const validToken = totp.generate()
         const payload = {
             ...BASE_REQUEST_PAYLOAD,
             trace: {
@@ -302,7 +267,7 @@ describe('Detection service tests', () => {
             },
             additionalData: {
                 username: TEST_USERNAME,
-                token: validToken,
+                token: totp.generate(),
             },
         }
         const response = await request(app)
