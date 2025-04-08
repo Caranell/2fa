@@ -1,84 +1,33 @@
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
-![Yarn](https://img.shields.io/badge/yarn-%232C8EBB.svg?style=for-the-badge&logo=yarn&logoColor=white)
+# Venn detector 2FA integration
 
-# Venn Custom Detector boilerplate
-A boilerplate for getting started with Venn as a Security Provider. Use is as a starting point to build your own custom detectors on Venn Network.
+This repository implements a Two-Factor Authentication (2FA) system for the Venn Framework using Time-based One-Time Passwords (TOTP). It leverages the `otpauth` library to generate and validate TOTP
 
-> 📚 [What is Venn?](https://docs.venn.build/)
+**Integration with Venn Detection Service:**
+
+The `DetectionService` (`src/modules/detection-module/service.ts`) utilizes the 2FA module to allow users to override potentially suspicious transaction detections. When a transaction is flagged as suspicious (e.g., based on value or number of internal calls), the service checks for 2FA credentials (`username` and `token`) provided in the `additionalData` field of the request.
+
+To do so, users first need to register in the system (either through UI or using /auth/user POST request). Users `username` and `secret` are saved in a `mongodb` collection. Upon registration, users will get a uri that can be saved in an app like Google Auth to later approve flagged transactions using 6-digit code.
+
+If credentials are present, the `AuthService` verifies the token. A valid token permits the otherwise suspicious transaction to proceed, effectively acting as a user-verified override.
+
+In this proof-of-concept app, venn detects and flags transactions as suspicious using these criteria:
+ - Transaction value is more than 1 ETH
+ - Number of internal calls within this transaction is more than 5
+
+_these rules are suggested to be modified for if intended to be used in production_
 
 ## Table of Contents
-- [Introduction](#venn-custom-detector-boilerplate)
-- [Quick Start](#quick-start)
-- [What's inside?](#-whats-inside)
+
 - [Local development:](#️-local-development)
 - [Deploy to production](#-deploy-to-production)
-
-## ✨ Quick start
-1. Clone or fork this repo and install dependencies using `yarn install` _(or `npm install`)_
-2. Find the detection service under: `src/modules/detection-module/service.ts`
-
-    ```ts
-    import { DetectionResponse, DetectionRequest } from './dtos'
-
-    /**
-     * DetectionService
-     *
-     * Implements a `detect` method that receives an enriched view of an
-     * EVM compatible transaction (i.e. `DetectionRequest`)
-     * and returns a `DetectionResponse`
-     *
-     * API Reference:
-     * https://github.com/ironblocks/venn-custom-detection/blob/master/docs/requests-responses.docs.md
-     */
-    export class DetectionService {
-        /**
-         * Update this implementation code to insepct the `DetectionRequest`
-         * based on your custom business logic
-         */
-        public static detect(request: DetectionRequest): DetectionResponse {
-            
-            /**
-             * For this "Hello World" style boilerplate
-             * we're mocking detection results using
-             * some random value
-             */
-            const detectionResult = Math.random() < 0.5;
-
-
-            /**
-             * Wrap our response in a `DetectionResponse` object
-             */
-            return new DetectionResponse({
-                request,
-                detectionInfo: {
-                    detected: detectionResult,
-                },
-            });
-        }
-    }
-    ```
-
-3. Implement your own logic in the `detect` method
-4. Run `yarn dev` _(or `npm run dev`)_
-5. That's it! Your custom detector service is now ready to inspect transaction
-
-## 📦 What's inside?
-This boilerplate is built using `Express.js`, and written in `TypeScript` using `NodeJS`.  
-You can use it as-is by adding your own security logic to it, or as a reference point when using a different programming language.
-
-**Notes on the API**
-1. Your detector will get a `DetectionRequest`, and is expected to respond with a `DetectionResponse`
-
-See our [API Reference](https://github.com/ironblocks/venn-custom-detection/blob/master/docs/requests-responses.docs.md) for more information.
 
 ## 🛠️ Local Development
 
 **Environment Setup**
+
+*Requirements*
+ - Node.js
+ - MongoDB
 
 Create a `.env` file with:
 
@@ -86,6 +35,8 @@ Create a `.env` file with:
 PORT=3000
 HOST=localhost
 LOG_LEVEL=debug
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=venn
 ```
 
 **Runing In Dev Mode**
@@ -106,6 +57,6 @@ yarn start      # or npm run start
 
 **Using Docker**
 ```bash
-docker build -f Dockerfile . -t my-custom-detector
+docker compose up --build -d
 ```
 

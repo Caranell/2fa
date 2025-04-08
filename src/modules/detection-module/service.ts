@@ -61,7 +61,7 @@ export class DetectionService {
 
         const numberOfCalls = request.trace.calls?.length ?? 0
 
-        return value > parseEther('1') || numberOfCalls > 10
+        return value > parseEther('1') || numberOfCalls > 5
     }
 
     // does request have data to verify 2fa?
