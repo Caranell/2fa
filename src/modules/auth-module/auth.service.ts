@@ -61,7 +61,7 @@ export class AuthService {
             const user = await usersService.getUserByUsername(username)
 
             if (!user) {
-                throw new Error(`User ${username} not found`)
+                return false
             }
 
             // Create a TOTP with the stored secret
