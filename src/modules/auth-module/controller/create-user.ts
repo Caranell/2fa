@@ -20,11 +20,11 @@ export const createUser = async (req: Request, res: Response) => {
             data: {
                 username,
                 totpUri: totpData.uri,
-                secret: totpData.secret,
             },
         })
     } catch (error) {
         console.error('Error creating user:', error)
-        return res.status(500).json({ error: 'Failed to create user' })
+        // @ts-ignore
+        return res.status(500).json({ error: 'Failed to create user. ' + error?.message })
     }
 }

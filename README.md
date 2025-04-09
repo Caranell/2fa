@@ -16,10 +16,10 @@ In this proof-of-concept app, venn detects and flags transactions as suspicious 
 
 _these rules are suggested to be modified for if intended to be used in production_
 
-## Table of Contents
 
-- [Local development:](#️-local-development)
-- [Deploy to production](#-deploy-to-production)
+## Proof of concept UI
+
+
 
 ## 🛠️ Local Development
 
@@ -43,6 +43,13 @@ MONGODB_DB_NAME=venn
 ```bash
 yarn        # or npm install
 yarn dev    # or npm run dev
+```
+
+*Start the UI*
+```bash
+cd ui
+yarn
+yarn dev
 ```
 
 ## 🚀 Deploy To Production
