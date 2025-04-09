@@ -21,6 +21,10 @@ _these rules are suggested to be modified for if intended to be used in producti
 
 
 
+https://github.com/user-attachments/assets/86537b71-9ca8-4bdc-aabe-a97cc3254709
+
+
+
 ## 🛠️ Local Development
 
 **Environment Setup**
